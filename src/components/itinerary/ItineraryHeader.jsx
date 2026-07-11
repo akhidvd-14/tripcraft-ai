@@ -1,7 +1,7 @@
 export default function ItineraryHeader({
   tripTitle, tripDates, tripTravelerLabel, tripBudgetLabel, tripFromLabel,
   collaborators, reminderOn, onToggleReminder, reminderText,
-  onOpenCollab, onOpenShare, onOpenSos,
+  onOpenCollab, onOpenShare, onOpenSos, onOpenEnquiry,
 }) {
   return (
     <>
@@ -15,6 +15,7 @@ export default function ItineraryHeader({
             </div>
           </div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <button onClick={onOpenEnquiry} style={{ background: 'var(--accent,#BC5A3C)', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: 999, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>✈️ Enquire / Book this trip</button>
             <button onClick={onOpenCollab} style={{ background: 'rgba(255,255,255,.12)', color: '#F4EEE1', border: '1px solid rgba(255,255,255,.2)', padding: '10px 16px', borderRadius: 999, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>👥 Add member</button>
             <button onClick={onOpenShare} style={{ background: 'rgba(255,255,255,.12)', color: '#F4EEE1', border: '1px solid rgba(255,255,255,.2)', padding: '10px 16px', borderRadius: 999, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>🔗 Share</button>
             <button onClick={onOpenSos} title="Emergency contacts" style={{ background: 'rgba(224,90,80,.18)', color: '#F6C9C4', border: '1px solid rgba(224,90,80,.35)', padding: '10px 16px', borderRadius: 999, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>🚨 SOS</button>

@@ -13,9 +13,11 @@ import { matchDest, formatRange, suggestList, depCities, surprisePool } from './
 import { codeItinerary, dbItinerary } from './services/destinations.js';
 import { createTrip, saveTripDays, listMyTrips } from './services/trips.js';
 import { addCollaborator, listCollaborators } from './services/collaborators.js';
+import { submitTripEnquiry, submitContactEnquiry } from './services/enquiries.js';
 import { KIND_COLORS, HOTEL_PHOTO_POOL, FOOD_PHOTO_POOL, DEST_PHOTO, uimg } from './data/content.jsx';
 import { useAuth } from './context/AuthContext.jsx';
 import MyTrips from './components/MyTrips.jsx';
+import EnquiryModal from './components/modals/EnquiryModal.jsx';
 
 const AVATAR_BGS = ['#E8B77E', '#A9C4A0', '#8AB6D6', '#C9A0DC', '#E8A87C', '#A0C4A9'];
 const initialsOf = (s) => (s || '?').split(/[\s@.]+/).filter(Boolean).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
@@ -48,6 +50,7 @@ export default function App() {
   const [shareOpen, setShareOpen] = useState(false);
   const [collabOpen, setCollabOpen] = useState(false);
   const [sosOpen, setSosOpen] = useState(false);
+  const [enquiryOpen, setEnquiryOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [reminderOn, setReminderOn] = useState(REMINDERS_DEFAULT_ON);
   const [currency, setCurrency] = useState(DEFAULT_CURRENCY);
@@ -334,6 +337,23 @@ export default function App() {
   const openSos = () => setSosOpen(true);
   const closeSos = () => setSosOpen(false);
 
+  // ---------- enquiries ----------
+  const openEnquiry = () => setEnquiryOpen(true);
+  const closeEnquiry = () => setEnquiryOpen(false);
+  const handleTripEnquiry = async ({ name, email, phone, message }) => {
+    const tripSummary = {
+      title: form.destination.split(',')[0] + ' · ' + daysBetween() + ' days',
+      destination: form.destination,
+      dates: formatRange(form.start, form.end),
+      travelers: (form.adults + form.kids) + ' · ' + form.travelerType,
+      budget: form.budget,
+      from: form.departure + ' by ' + form.transport,
+      interests: (form.interests || []).join(', '),
+    };
+    return submitTripEnquiry({ name, email, phone, message, tripId, tripSummary });
+  };
+  const handleContactEnquiry = async ({ name, email, message }) => submitContactEnquiry({ name, email, message });
+
   // ---------- AI edit ----------
   const openAiEdit = (id) => { setAiEditId(id); setAiText(''); };
   const cancelAi = () => { setAiEditId(null); setAiText(''); };
@@ -518,7 +538,7 @@ export default function App() {
       />
 
       {screen === 'landing' && (
-        <LandingPage onGoPlan={goPlan} onGoItinerary={goItinerary} onSelectPackage={selectPackage} />
+        <LandingPage onGoPlan={goPlan} onGoItinerary={goItinerary} onSelectPackage={selectPackage} onSubmitContact={handleContactEnquiry} />
       )}
 
       {screen === 'mytrips' && (
@@ -570,6 +590,7 @@ export default function App() {
             onOpenCollab: openCollab,
             onOpenShare: openShare,
             onOpenSos: openSos,
+            onOpenEnquiry: openEnquiry,
           }}
           dayTabs={{
             days: effectiveDays,
@@ -624,6 +645,7 @@ export default function App() {
         collaborators={collaborators}
       />
       <SosModal open={sosOpen} onClose={closeSos} sosSubtitle={bundle.region + ' · save these before you travel.'} sosNumbers={bundle.sos} />
+      <EnquiryModal open={enquiryOpen} tripLabel={form.destination.split(',')[0] + ' · ' + daysBetween() + ' days'} onClose={closeEnquiry} onSubmit={handleTripEnquiry} />
       <Toast toast={toast} />
       <Chatbot
         visible={SHOW_CHATBOT}

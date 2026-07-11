@@ -6,7 +6,7 @@ import Features from './Features.jsx';
 import Testimonials from './Testimonials.jsx';
 import CtaFooter from './CtaFooter.jsx';
 
-export default function LandingPage({ onGoPlan, onGoItinerary, onSelectPackage }) {
+export default function LandingPage({ onGoPlan, onGoItinerary, onSelectPackage, onSubmitContact }) {
   return (
     <div>
       <Hero onGoPlan={onGoPlan} />
@@ -15,7 +15,7 @@ export default function LandingPage({ onGoPlan, onGoItinerary, onSelectPackage }
       <HowItWorks onGoPlan={onGoPlan} />
       <Features />
       <Testimonials />
-      <CtaFooter onGoPlan={onGoPlan} />
+      <CtaFooter onGoPlan={onGoPlan} onSubmitContact={onSubmitContact} />
     </div>
   );
 }

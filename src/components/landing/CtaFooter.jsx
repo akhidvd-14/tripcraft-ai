@@ -1,6 +1,51 @@
+import { useState } from 'react';
 import { LogoIcon } from '../../icons.jsx';
 
-export default function CtaFooter({ onGoPlan }) {
+function ContactForm({ onSubmitContact }) {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [done, setDone] = useState(false);
+
+  const inputStyle = { width: '100%', padding: '12px 14px', fontSize: 14, border: `1px solid rgba(var(--tc-border-rgb),.2)`, borderRadius: 11, background: 'var(--tc-surface)', outline: 'none', color: 'var(--tc-text)' };
+
+  const submit = async () => {
+    setError('');
+    if (!name.trim() || !email.trim() || !message.trim()) { setError('Please fill in your name, email and message.'); return; }
+    setBusy(true);
+    try {
+      const { error: err } = await onSubmitContact({ name: name.trim(), email: email.trim(), message: message.trim() });
+      if (err) { setError(err.message || 'Something went wrong.'); return; }
+      setDone(true); setName(''); setEmail(''); setMessage('');
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <div style={{ background: 'var(--tc-surface)', border: `1px solid rgba(var(--tc-border-rgb),.1)`, borderRadius: 18, padding: 26, maxWidth: 560, margin: '30px auto 0', textAlign: 'left' }}>
+      <h3 style={{ fontSize: 22, textAlign: 'center' }}>Have a question? Get in touch</h3>
+      <p style={{ fontSize: 13.5, color: 'var(--tc-muted)', textAlign: 'center', margin: '6px 0 18px' }}>Send us a note and we'll get back to you by email.</p>
+      {done ? (
+        <div style={{ textAlign: 'center', color: '#3F6B4A', fontSize: 14.5, fontWeight: 600, padding: '10px 0' }}>✅ Thanks — your message is on its way. We'll be in touch soon.</div>
+      ) : (
+        <>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+            <input placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} style={inputStyle} />
+            <input placeholder="Email address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} style={inputStyle} />
+          </div>
+          <textarea placeholder="How can we help?" value={message} onChange={(e) => setMessage(e.target.value)} rows={3} style={{ ...inputStyle, resize: 'vertical', marginBottom: 10 }} />
+          {error && <div style={{ fontSize: 13, color: '#B0392F', marginBottom: 10 }}>{error}</div>}
+          <button onClick={submit} disabled={busy} style={{ width: '100%', background: 'var(--accent,#BC5A3C)', color: '#fff', border: 'none', padding: 13, borderRadius: 11, fontSize: 15, fontWeight: 600, cursor: busy ? 'not-allowed' : 'pointer', opacity: busy ? 0.7 : 1 }}>
+            {busy ? 'Sending…' : 'Send message'}
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
+export default function CtaFooter({ onGoPlan, onSubmitContact }) {
   return (
     <>
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '70px 28px', textAlign: 'center' }}>
@@ -8,6 +53,7 @@ export default function CtaFooter({ onGoPlan }) {
         <button onClick={onGoPlan} style={{ background: 'var(--accent,#BC5A3C)', color: '#fff', border: 'none', padding: '16px 32px', borderRadius: 999, fontSize: 16, fontWeight: 600, cursor: 'pointer', marginTop: 26, boxShadow: '0 10px 26px -10px rgba(188,90,60,.6)' }}>
           Plan my trip — it's free
         </button>
+        {onSubmitContact && <ContactForm onSubmitContact={onSubmitContact} />}
       </div>
 
       <div style={{ background: 'var(--tc-section-alt)', borderTop: `1px solid rgba(var(--tc-border-rgb),.1)` }}>
