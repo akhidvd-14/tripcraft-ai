@@ -11,8 +11,15 @@ import Toast from './components/modals/Toast.jsx';
 import Chatbot from './components/Chatbot.jsx';
 import { matchDest, formatRange, suggestList, depCities, surprisePool } from './data/destinations.js';
 import { codeItinerary, dbItinerary } from './services/destinations.js';
+import { createTrip, saveTripDays, listMyTrips } from './services/trips.js';
+import { addCollaborator, listCollaborators } from './services/collaborators.js';
 import { KIND_COLORS, HOTEL_PHOTO_POOL, FOOD_PHOTO_POOL, DEST_PHOTO, uimg } from './data/content.jsx';
 import { useAuth } from './context/AuthContext.jsx';
+import MyTrips from './components/MyTrips.jsx';
+
+const AVATAR_BGS = ['#E8B77E', '#A9C4A0', '#8AB6D6', '#C9A0DC', '#E8A87C', '#A0C4A9'];
+const initialsOf = (s) => (s || '?').split(/[\s@.]+/).filter(Boolean).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+const nameFromEmail = (email) => email.split('@')[0].replace(/\./g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
 // Design-tool "props" defaults (accentColor / defaultCurrency / showChatbot / remindersDefaultOn).
 const ACCENT_COLOR = '#BC5A3C';
@@ -51,6 +58,9 @@ export default function App() {
   const [activeOpt, setActiveOpt] = useState([0, 0, 0, 0]);
   const [days, setDays] = useState(null);
   const [bundle, setBundle] = useState(() => codeItinerary('sikkim', INITIAL_FORM.start, INITIAL_FORM.destination).bundle);
+  const [tripId, setTripId] = useState(null);
+  const [myTrips, setMyTrips] = useState([]);
+  const [myTripsLoading, setMyTripsLoading] = useState(false);
   const [dragFrom, setDragFrom] = useState(null);
   const [collabInput, setCollabInputState] = useState('');
   const [collabRole, setCollabRoleState] = useState('Can edit');
@@ -84,12 +94,46 @@ export default function App() {
       setBundle(res.bundle); // sidebar content always refreshes to DB
       if (!daysDirtyRef.current) setDays(res.days); // days only if untouched
     });
+    return code.days;
   };
 
   useEffect(() => {
     applyItinerary(destKey, form.start, form.destination);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // ---------- saved-trip helpers ----------
+  const daysBetweenFor = (f) => {
+    try {
+      const a = new Date(f.start), b = new Date(f.end);
+      const n = Math.round((b - a) / 86400000) + 1;
+      return n > 0 ? n : 1;
+    } catch (e) { return 4; }
+  };
+  const ownerInfo = () => (user ? { name: user.user_metadata?.full_name || nameFromEmail(user.email), email: user.email } : null);
+  const buildCollabDisplay = (rows, owner) => {
+    const list = [];
+    if (owner) list.push({ name: owner.name || 'You', email: owner.email, initials: initialsOf(owner.name || owner.email), role: 'Owner', bg: AVATAR_BGS[0] });
+    (rows || []).forEach((r, i) => {
+      const nm = nameFromEmail(r.email);
+      list.push({ name: nm, email: r.email, initials: initialsOf(nm), role: r.role, bg: AVATAR_BGS[(i + 1) % AVATAR_BGS.length] });
+    });
+    return list;
+  };
+
+  // Create + persist a trip for the signed-in user when an itinerary is generated.
+  const startTripIfLoggedIn = (key, formSnapshot, generatedDays) => {
+    setTripId(null);
+    if (!user) return;
+    const title = formSnapshot.destination.split(',')[0] + ' · ' + daysBetweenFor(formSnapshot) + ' days';
+    createTrip({ form: formSnapshot, destKey: key, days: generatedDays, title }).then((res) => {
+      if (res) {
+        setTripId(res.id);
+        setCollaborators(buildCollabDisplay([], ownerInfo()));
+        showToast('Trip saved to your account');
+      }
+    });
+  };
 
   // Theme CSS variables are scoped to [data-tc-theme] — mirror the attribute onto
   // <html> too so `body`'s background (a parent of the themed div) can inherit them.
@@ -115,18 +159,60 @@ export default function App() {
     setTheme(t);
   };
 
+  // Debounced autosave: persist edited days to the current saved trip.
+  useEffect(() => {
+    if (!tripId || !daysDirtyRef.current || !days) return;
+    const t = setTimeout(() => { saveTripDays(tripId, days); }, 800);
+    return () => clearTimeout(t);
+  }, [days, tripId]);
+
   // ---------- navigation ----------
   const goHome = () => setScreen('landing');
   const goPlan = () => { setScreen('plan'); setPlanStep(1); };
   const goItinerary = () => setScreen('itinerary');
+  const goMyTrips = async () => {
+    setScreen('mytrips');
+    setMyTripsLoading(true);
+    const trips = await listMyTrips();
+    setMyTrips(trips);
+    setMyTripsLoading(false);
+  };
+  const openSavedTrip = async (t) => {
+    const loadedForm = {
+      destination: t.destination, start: t.start_date || '', end: t.end_date || '',
+      travelerType: t.traveler_type, adults: t.adults, kids: t.kids, budget: t.budget,
+      departure: t.departure, transport: t.transport, interests: t.interests || [],
+    };
+    setForm(loadedForm);
+    setDestKey(t.dest_key);
+    setTripId(t.id);
+    daysDirtyRef.current = false;
+    genTokenRef.current++; // cancel any in-flight destination refresh
+    setDays(t.days || []);
+    setActiveDay(0);
+    setActiveOpt([0, 0, 0, 0]);
+    // Sidebar bundle from DB (falls back to code); saved days are kept as-is.
+    const res = await dbItinerary(t.dest_key, t.start_date, t.destination);
+    setBundle(res ? res.bundle : codeItinerary(t.dest_key, t.start_date, t.destination).bundle);
+    // Collaborators for this trip.
+    const rows = await listCollaborators(t.id);
+    const owner = t.isOwner ? ownerInfo() : { name: 'Owner', email: '' };
+    setCollaborators(buildCollabDisplay(rows, owner));
+    setScreen('itinerary');
+  };
   const scrollTestimonials = () => {
     const el = document.getElementById('tc-testimonials');
     if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 40, behavior: 'smooth' });
   };
   const selectPackage = (key) => {
+    // Align the form's destination with the picked package so a saved trip is coherent.
+    const region = codeItinerary(key, form.start, form.destination).bundle.region;
+    const newForm = { ...form, destination: region };
+    setForm(newForm);
     setDestKey(key);
-    applyItinerary(key, form.start, form.destination);
+    const genDays = applyItinerary(key, newForm.start, region);
     setScreen('itinerary');
+    startTripIfLoggedIn(key, newForm, genDays);
   };
 
   // ---------- auth ----------
@@ -140,6 +226,9 @@ export default function App() {
   };
   const handleSignOut = async () => {
     await signOut();
+    setTripId(null);
+    setMyTrips([]);
+    if (screen === 'mytrips') setScreen('landing');
     showToast('Signed out');
   };
 
@@ -174,10 +263,11 @@ export default function App() {
     if (planStep >= 4) {
       const key = matchDest(form.destination);
       setDestKey(key);
-      applyItinerary(key, form.start, form.destination);
+      const genDays = applyItinerary(key, form.start, form.destination);
       setShowSuggest(false);
       setScreen('itinerary');
       showToast('Your ' + form.destination.split(',')[0] + ' itinerary is ready! ✨');
+      startTripIfLoggedIn(key, form, genDays);
     } else {
       setPlanStep((s) => s + 1);
     }
@@ -221,15 +311,24 @@ export default function App() {
   const closeCollab = () => setCollabOpen(false);
   const setCollabInput = (e) => setCollabInputState(e.target.value);
   const setCollabRole = (e) => setCollabRoleState(e.target.value);
-  const addCollab = () => {
+  const addCollab = async () => {
     const v = collabInput.trim();
     if (!v) return;
-    const name = v.split('@')[0].replace(/\./g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-    const initials = name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
-    const bgs = ['#C9A0DC', '#8AB6D6', '#E8A87C', '#A0C4A9'];
-    setCollaborators((cs) => [...cs, { name, email: v, initials, role: collabRole, bg: bgs[cs.length % bgs.length] }]);
-    setCollabInputState('');
-    showToast('Invite sent to ' + v);
+    if (tripId) {
+      // Persist the invite to the trip; refresh from DB.
+      const { error } = await addCollaborator(tripId, v, collabRole);
+      if (error) { showToast(error.message); return; }
+      const rows = await listCollaborators(tripId);
+      setCollaborators(buildCollabDisplay(rows, ownerInfo()));
+      setCollabInputState('');
+      showToast('Invite sent to ' + v);
+    } else {
+      // Unsaved / logged-out: keep the in-memory invite (nudged to sign in).
+      const name = nameFromEmail(v);
+      setCollaborators((cs) => [...cs, { name, email: v, initials: initialsOf(name), role: collabRole, bg: AVATAR_BGS[(cs.length) % AVATAR_BGS.length] }]);
+      setCollabInputState('');
+      showToast(user ? 'Generate or open a trip to invite members' : 'Sign in to invite members to a saved trip');
+    }
   };
 
   const openSos = () => setSosOpen(true);
@@ -415,10 +514,15 @@ export default function App() {
         onOpenRegister={openRegister}
         user={user}
         onSignOut={handleSignOut}
+        onGoMyTrips={goMyTrips}
       />
 
       {screen === 'landing' && (
         <LandingPage onGoPlan={goPlan} onGoItinerary={goItinerary} onSelectPackage={selectPackage} />
+      )}
+
+      {screen === 'mytrips' && (
+        <MyTrips trips={myTrips} loading={myTripsLoading} onOpenTrip={openSavedTrip} onGoPlan={goPlan} />
       )}
 
       {screen === 'plan' && (
