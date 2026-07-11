@@ -9,7 +9,8 @@ import CollabModal from './components/modals/CollabModal.jsx';
 import SosModal from './components/modals/SosModal.jsx';
 import Toast from './components/modals/Toast.jsx';
 import Chatbot from './components/Chatbot.jsx';
-import { buildDays, destBundle, matchDest, formatRange, suggestList, depCities, surprisePool } from './data/destinations.js';
+import { matchDest, formatRange, suggestList, depCities, surprisePool } from './data/destinations.js';
+import { codeItinerary, dbItinerary } from './services/destinations.js';
 import { KIND_COLORS, HOTEL_PHOTO_POOL, FOOD_PHOTO_POOL, DEST_PHOTO, uimg } from './data/content.jsx';
 import { useAuth } from './context/AuthContext.jsx';
 
@@ -49,6 +50,7 @@ export default function App() {
   const [activeDay, setActiveDay] = useState(0);
   const [activeOpt, setActiveOpt] = useState([0, 0, 0, 0]);
   const [days, setDays] = useState(null);
+  const [bundle, setBundle] = useState(() => codeItinerary('sikkim', INITIAL_FORM.start, INITIAL_FORM.destination).bundle);
   const [dragFrom, setDragFrom] = useState(null);
   const [collabInput, setCollabInputState] = useState('');
   const [collabRole, setCollabRoleState] = useState('Can edit');
@@ -62,9 +64,30 @@ export default function App() {
   ]);
 
   const toastTimer = useRef(null);
+  const genTokenRef = useRef(0);   // guards against stale destination switches
+  const daysDirtyRef = useRef(false); // true once the user edits the current itinerary
+
+  // Load a destination's bundle + day plan: instant from bundled code data, then
+  // refreshed from the DB (authoritative) when Supabase is configured. The token
+  // + dirty guards prevent a slow DB response from clobbering a newer selection
+  // or the user's in-progress edits.
+  const applyItinerary = (key, startDate, formDestination) => {
+    daysDirtyRef.current = false;
+    const token = ++genTokenRef.current;
+    const code = codeItinerary(key, startDate, formDestination);
+    setBundle(code.bundle);
+    setDays(code.days);
+    setActiveDay(0);
+    setActiveOpt([0, 0, 0, 0]);
+    dbItinerary(key, startDate, formDestination).then((res) => {
+      if (!res || genTokenRef.current !== token) return;
+      setBundle(res.bundle); // sidebar content always refreshes to DB
+      if (!daysDirtyRef.current) setDays(res.days); // days only if untouched
+    });
+  };
 
   useEffect(() => {
-    setDays(buildDays(destKey, form.start, form.destination));
+    applyItinerary(destKey, form.start, form.destination);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -102,9 +125,7 @@ export default function App() {
   };
   const selectPackage = (key) => {
     setDestKey(key);
-    setDays(buildDays(key, form.start, form.destination));
-    setActiveDay(0);
-    setActiveOpt([0, 0, 0, 0]);
+    applyItinerary(key, form.start, form.destination);
     setScreen('itinerary');
   };
 
@@ -153,9 +174,7 @@ export default function App() {
     if (planStep >= 4) {
       const key = matchDest(form.destination);
       setDestKey(key);
-      setDays(buildDays(key, form.start, form.destination));
-      setActiveDay(0);
-      setActiveOpt([0, 0, 0, 0]);
+      applyItinerary(key, form.start, form.destination);
       setShowSuggest(false);
       setScreen('itinerary');
       showToast('Your ' + form.destination.split(',')[0] + ' itinerary is ready! ✨');
@@ -169,6 +188,7 @@ export default function App() {
   const setOpt = (i) => setActiveOpt((a) => { const next = [...a]; next[activeDay] = i; return next; });
 
   const mutateItems = (fn) => {
+    daysDirtyRef.current = true;
     setDays((prevDays) => {
       const newDays = prevDays.map((d) => ({ ...d, options: d.options.map((o) => ({ ...o, items: [...o.items] })) }));
       const items = newDays[activeDay].options[activeOpt[activeDay]].items;
@@ -180,7 +200,7 @@ export default function App() {
   const addActivity = () => {
     mutateItems((items) => items.push({
       id: 'u' + Date.now(), time: 'Flexible', kind: 'Custom', title: 'New stop',
-      desc: 'Tap to describe your own activity.', place: destBundle(destKey, form.destination).city,
+      desc: 'Tap to describe your own activity.', place: bundle.city,
       ph: 'your_stop', altIdx: -1, alts: [],
     }));
     showToast('Added — drag it into place');
@@ -297,8 +317,9 @@ export default function App() {
   };
 
   // ================= DERIVED VIEW MODEL =================
-  const bundle = destBundle(destKey, form.destination);
-  const effectiveDays = days || buildDays(destKey, form.start, form.destination);
+  // `bundle` and `days` are state, populated by applyItinerary (code-instant then
+  // DB-authoritative). effectiveDays guards the first render before load completes.
+  const effectiveDays = days || [];
   const day = effectiveDays[activeDay];
   const optIdx = activeOpt[activeDay];
   const rawItems = day ? day.options[optIdx].items : [];
