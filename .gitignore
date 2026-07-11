@@ -4,3 +4,12 @@ dist
 *.local
 scratch
 .claude/settings.local.json
+
+# Environment / secrets — never commit
+.env
+.env.*
+!.env.example
+
+# Supabase local
+supabase/.temp
+supabase/.branches

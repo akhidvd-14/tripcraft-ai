@@ -11,6 +11,7 @@ import Toast from './components/modals/Toast.jsx';
 import Chatbot from './components/Chatbot.jsx';
 import { buildDays, destBundle, matchDest, formatRange, suggestList, depCities, surprisePool } from './data/destinations.js';
 import { KIND_COLORS, HOTEL_PHOTO_POOL, FOOD_PHOTO_POOL, DEST_PHOTO, uimg } from './data/content.jsx';
+import { useAuth } from './context/AuthContext.jsx';
 
 // Design-tool "props" defaults (accentColor / defaultCurrency / showChatbot / remindersDefaultOn).
 const ACCENT_COLOR = '#BC5A3C';
@@ -25,6 +26,7 @@ const INITIAL_FORM = {
 };
 
 export default function App() {
+  const { user, signOut } = useAuth();
   const [screen, setScreen] = useState('landing');
   const [theme, setTheme] = useState(() => (typeof localStorage !== 'undefined' && localStorage.getItem('tc_theme')) || 'light');
   const [planStep, setPlanStep] = useState(1);
@@ -111,9 +113,13 @@ export default function App() {
   const openRegister = () => { setAuthOpen(true); setAuthMode('register'); };
   const closeAuth = () => setAuthOpen(false);
   const toggleAuthMode = () => setAuthMode((m) => (m === 'login' ? 'register' : 'login'));
-  const authSubmit = () => {
+  const authSuccess = (mode) => {
     setAuthOpen(false);
-    showToast(authMode === 'login' ? 'Welcome back!' : 'Account created — happy travels!');
+    showToast(mode === 'login' ? 'Welcome back!' : 'Account created — happy travels!');
+  };
+  const handleSignOut = async () => {
+    await signOut();
+    showToast('Signed out');
   };
 
   // ---------- wizard ----------
@@ -386,6 +392,8 @@ export default function App() {
         onScrollTestimonials={scrollTestimonials}
         onOpenLogin={openLogin}
         onOpenRegister={openRegister}
+        user={user}
+        onSignOut={handleSignOut}
       />
 
       {screen === 'landing' && (
@@ -477,7 +485,7 @@ export default function App() {
         authSwitchCta={authMode === 'login' ? 'Create an account' : 'Sign in'}
         onClose={closeAuth}
         onToggleMode={toggleAuthMode}
-        onSubmit={authSubmit}
+        onSuccess={authSuccess}
       />
       <ShareModal open={shareOpen} onClose={closeShare} onCopyLink={copyLink} copyLabel={copied ? 'Copied ✓' : 'Copy'} />
       <CollabModal
