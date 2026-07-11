@@ -1,0 +1,114 @@
+/* TripCraft.ai — global styles, ported from the Claude Design prototype.
+   Component-level layout/spacing stays as inline styles (as in the source
+   design); this file holds fonts, resets, theme variables, keyframes and
+   the handful of :hover states the design specified via style-hover. */
+
+* { box-sizing: border-box; }
+
+html, body, #root { min-height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--tc-bg);
+  color: var(--tc-text);
+  font-family: 'Hanken Grotesk', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: background .15s ease, color .15s ease;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Newsreader', Georgia, serif;
+  font-weight: 500;
+  margin: 0;
+  color: var(--tc-heading);
+}
+
+a { color: var(--accent, #BC5A3C); text-decoration: none; }
+a:hover { color: #9E4A30; }
+::selection { background: #E4C9AF; }
+
+input, select, textarea, button { font-family: inherit; }
+
+/* ---------- THEME VARIABLES ---------- */
+[data-tc-theme='light'] {
+  --tc-bg: #F6F1E9;
+  --tc-surface: #ffffff;
+  --tc-surface-alt: #FBF8F2;
+  --tc-section-alt: #EEE4D4;
+  --tc-tag-bg: #F1E6D6;
+  --tc-tag-fg: #8A5A3A;
+  --tc-text: #2A2622;
+  --tc-heading: #2A2622;
+  --tc-muted: #5B534A;
+  --tc-muted-2: #7A7166;
+  --tc-muted-3: #9A8E7E;
+  --tc-border-rgb: 42, 38, 34;
+  --tc-navbar-bg: rgba(246, 241, 233, .86);
+  --tc-suggest-hover: #F5EADB;
+}
+
+[data-tc-theme='dark'] {
+  --tc-bg: #16130F;
+  --tc-surface: #221D17;
+  --tc-surface-alt: #221D17;
+  --tc-section-alt: #20291F;
+  --tc-tag-bg: #2C2419;
+  --tc-tag-fg: #E7C9A6;
+  --tc-text: #EFE8DB;
+  --tc-heading: #F3ECDF;
+  --tc-muted: #C6BCAD;
+  --tc-muted-2: #9E9384;
+  --tc-muted-3: #9E9384;
+  --tc-border-rgb: 240, 235, 222;
+  --tc-navbar-bg: rgba(18, 15, 11, .86);
+  --tc-suggest-hover: #2C2419;
+}
+
+[data-tc-theme='dark'] input,
+[data-tc-theme='dark'] select,
+[data-tc-theme='dark'] textarea {
+  background-color: var(--tc-surface-alt) !important;
+  color: var(--tc-text) !important;
+}
+
+/* ---------- SHARED UTILITIES ---------- */
+.tc-ph {
+  background-image: repeating-linear-gradient(135deg, #E9DECD, #E9DECD 9px, #E3D6C1 9px, #E3D6C1 18px);
+  display: flex; align-items: flex-end; justify-content: flex-start;
+}
+[data-tc-theme='dark'] .tc-ph {
+  background-image: repeating-linear-gradient(135deg, #2A241C, #2A241C 9px, #241E17 9px, #241E17 18px);
+}
+
+.tc-scroll::-webkit-scrollbar { height: 8px; width: 8px; }
+.tc-scroll::-webkit-scrollbar-thumb { background: rgba(42, 38, 34, .2); border-radius: 8px; }
+[data-tc-theme='dark'] .tc-scroll::-webkit-scrollbar-thumb { background: rgba(240, 235, 222, .25); }
+
+@keyframes tcfade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes tcpop { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes tcpulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(188, 90, 60, .4); } 50% { box-shadow: 0 0 0 10px rgba(188, 90, 60, 0); } }
+
+/* ---------- HOVER STATES (from style-hover in the source) ---------- */
+.tc-card-hover { transition: transform .15s, box-shadow .15s, border-color .15s; }
+.tc-card-hover:hover {
+  border-color: rgba(188, 90, 60, .4) !important;
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px -18px rgba(42, 38, 34, .4);
+}
+
+.tc-pkg-hover { transition: transform .15s, box-shadow .15s, border-color .15s; }
+.tc-pkg-hover:hover {
+  border-color: rgba(188, 90, 60, .35) !important;
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -22px rgba(42, 38, 34, .5);
+}
+
+.tc-activity-hover { transition: box-shadow .15s, border-color .15s; }
+.tc-activity-hover:hover {
+  border-color: rgba(188, 90, 60, .35) !important;
+  box-shadow: 0 10px 24px -14px rgba(42, 38, 34, .4);
+}
+
+.tc-suggest-row:hover { background: var(--tc-suggest-hover) !important; }
+
+.tc-navlink { transition: color .15s; }
