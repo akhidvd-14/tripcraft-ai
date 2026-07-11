@@ -2,7 +2,7 @@ export default function FoodSpots({ foodSpots }) {
   return (
     <div style={{ background: 'var(--tc-surface)', border: `1px solid rgba(var(--tc-border-rgb),.1)`, borderRadius: 18, padding: 22, marginTop: 26 }}>
       <h3 style={{ fontSize: 22 }}>Where to eat today</h3>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginTop: 16 }}>
+      <div className="tc-grid tc-grid-3" style={{ gap: 12, marginTop: 16 }}>
         {foodSpots.map((fs) => (
           <div key={fs.name} style={{ border: `1px solid rgba(var(--tc-border-rgb),.08)`, borderRadius: 12, overflow: 'hidden' }}>
             <div className="tc-ph" style={{ height: 82, overflow: 'hidden' }}>

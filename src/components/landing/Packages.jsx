@@ -2,7 +2,7 @@ import { PACKAGES } from '../../data/content.jsx';
 
 export default function Packages({ onSelectPackage, onGoItinerary }) {
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '64px 28px 16px' }}>
+    <div className="tc-pad-x" style={{ maxWidth: 1200, margin: '0 auto', padding: '64px 28px 16px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16, marginBottom: 36 }}>
         <div style={{ maxWidth: 560 }}>
           <div style={{ fontSize: 12.5, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--accent,#BC5A3C)', marginBottom: 10 }}>Handpicked destinations · India &amp; beyond</div>
@@ -13,7 +13,7 @@ export default function Packages({ onSelectPackage, onGoItinerary }) {
           Build a custom trip →
         </button>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 20 }}>
+      <div className="tc-grid tc-grid-3" style={{ gap: 20 }}>
         {PACKAGES.map((p) => (
           <div key={p.key} onClick={() => onSelectPackage(p.destKey)} className="tc-pkg-hover"
             style={{ background: 'var(--tc-surface)', border: `1px solid rgba(var(--tc-border-rgb),.09)`, borderRadius: 18, overflow: 'hidden', cursor: 'pointer', display: 'flex', flexDirection: 'column' }}>

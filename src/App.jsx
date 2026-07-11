@@ -256,7 +256,8 @@ export default function App() {
   const decAdults = () => setForm((f) => ({ ...f, adults: Math.max(1, f.adults - 1) }));
   const incKids = () => setForm((f) => ({ ...f, kids: f.kids + 1 }));
   const decKids = () => setForm((f) => ({ ...f, kids: Math.max(0, f.kids - 1) }));
-  const selectTraveler = (title) => setForm((f) => ({ ...f, travelerType: title }));
+  const selectTraveler = (title) =>
+    setForm((f) => (title === 'Solo' ? { ...f, travelerType: title, adults: 1, kids: 0 } : { ...f, travelerType: title }));
   const selectInterest = (title) => setForm((f) => ({ ...f, interests: [title] }));
   const selectBudget = (title) => setForm((f) => ({ ...f, budget: title }));
   const selectTransport = (title) => setForm((f) => ({ ...f, transport: title }));

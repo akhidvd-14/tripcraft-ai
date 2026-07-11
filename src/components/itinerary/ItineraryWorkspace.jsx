@@ -9,7 +9,7 @@ export default function ItineraryWorkspace({ header, dayTabs, activities, onAddA
     <div style={{ animation: 'tcfade .4s ease both' }}>
       <ItineraryHeader {...header} />
 
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: 28, display: 'grid', gridTemplateColumns: '1fr 340px', gap: 28, alignItems: 'start' }}>
+      <div className="tc-itin-grid tc-pad-x" style={{ maxWidth: 1200, margin: '0 auto', padding: 28, alignItems: 'start' }}>
         <div>
           <DayTabs {...dayTabs} />
 

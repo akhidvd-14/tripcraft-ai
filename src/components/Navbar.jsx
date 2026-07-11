@@ -5,7 +5,7 @@ export default function Navbar({ theme, onToggleTheme, onGoHome, onGoPlan, onScr
   const initials = displayName ? displayName.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase() : '';
   return (
     <div style={{ position: 'sticky', top: 0, zIndex: 40, background: 'var(--tc-navbar-bg)', backdropFilter: 'blur(12px)', borderBottom: `1px solid rgba(var(--tc-border-rgb),.1)` }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 28px', height: 68, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className="tc-pad-x" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 28px', height: 68, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div onClick={onGoHome} style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
           <div style={{ position: 'relative', width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--accent,#BC5A3C)', borderRadius: 10 }}>
             <LogoIcon />
@@ -14,13 +14,13 @@ export default function Navbar({ theme, onToggleTheme, onGoHome, onGoPlan, onScr
             <span style={{ fontFamily: "'Newsreader',serif", fontSize: 21, fontWeight: 600, letterSpacing: '-.3px' }}>
               TripCraft<span style={{ color: 'var(--accent,#BC5A3C)' }}>.ai</span>
             </span>
-            <span style={{ fontSize: 9.5, letterSpacing: '2.4px', textTransform: 'uppercase', color: 'var(--tc-muted-3)', marginTop: 2 }}>
+            <span className="tc-nav-tagline" style={{ fontSize: 9.5, letterSpacing: '2.4px', textTransform: 'uppercase', color: 'var(--tc-muted-3)', marginTop: 2 }}>
               Craft the journey, not just the trip
             </span>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 26 }}>
-          <div style={{ display: 'flex', gap: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+          <div className="tc-nav-links" style={{ display: 'flex', gap: 24 }}>
             <span className="tc-navlink" onClick={onGoPlan} style={{ fontSize: 14, color: 'var(--tc-muted)', cursor: 'pointer' }}>Plan a trip</span>
             {user && onGoMyTrips && (
               <span className="tc-navlink" onClick={onGoMyTrips} style={{ fontSize: 14, color: 'var(--tc-muted)', cursor: 'pointer' }}>My trips</span>

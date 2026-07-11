@@ -6,7 +6,7 @@ export default function ItineraryHeader({
   return (
     <>
       <div style={{ background: '#3F4A3B', color: '#EDE7D8' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '26px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16 }}>
+        <div className="tc-pad-x" style={{ maxWidth: 1200, margin: '0 auto', padding: '26px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16 }}>
           <div>
             <div style={{ fontSize: 12, letterSpacing: '2px', textTransform: 'uppercase', color: '#C9B79A' }}>Your itinerary</div>
             <h2 style={{ fontSize: 36, color: '#F4EEE1', marginTop: 4 }}>{tripTitle}</h2>
@@ -21,7 +21,7 @@ export default function ItineraryHeader({
             <button onClick={onOpenSos} title="Emergency contacts" style={{ background: 'rgba(224,90,80,.18)', color: '#F6C9C4', border: '1px solid rgba(224,90,80,.35)', padding: '10px 16px', borderRadius: 999, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>🚨 SOS</button>
           </div>
         </div>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 28px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+        <div className="tc-pad-x" style={{ maxWidth: 1200, margin: '0 auto', padding: '0 28px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: 12, color: '#C9B79A' }}>Trip crew:</span>
             <div style={{ display: 'flex' }}>

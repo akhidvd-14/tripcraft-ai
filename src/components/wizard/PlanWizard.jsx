@@ -21,12 +21,12 @@ export default function PlanWizard({ planStep, onBack, onNext, ...stepProps }) {
   const nextLabel = planStep >= 4 ? 'Generate itinerary ✨' : 'Continue →';
 
   return (
-    <div style={{ maxWidth: 820, margin: '0 auto', padding: '48px 28px 90px', animation: 'tcfade .4s ease both' }}>
+    <div className="tc-pad-x" style={{ maxWidth: 820, margin: '0 auto', padding: '48px 28px 90px', animation: 'tcfade .4s ease both' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 30 }}>
         {wizardSteps.map((w) => (
           <div key={w.label} style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
             <div style={{ width: 26, height: 26, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, background: w.bg, color: w.fg, flex: 'none' }}>{w.num}</div>
-            <span style={{ fontSize: 12.5, color: w.textColor, whiteSpace: 'nowrap' }}>{w.label}</span>
+            <span className="tc-wizard-steplabel" style={{ fontSize: 12.5, color: w.textColor, whiteSpace: 'nowrap' }}>{w.label}</span>
             <div style={{ height: 1, background: `rgba(var(--tc-border-rgb),.15)`, flex: 1 }} />
           </div>
         ))}

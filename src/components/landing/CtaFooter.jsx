@@ -30,7 +30,7 @@ function ContactForm({ onSubmitContact }) {
         <div style={{ textAlign: 'center', color: '#3F6B4A', fontSize: 14.5, fontWeight: 600, padding: '10px 0' }}>✅ Thanks — your message is on its way. We'll be in touch soon.</div>
       ) : (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+          <div className="tc-grid tc-grid-2" style={{ gap: 10, marginBottom: 10 }}>
             <input placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} style={inputStyle} />
             <input placeholder="Email address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} style={inputStyle} />
           </div>
@@ -48,7 +48,7 @@ function ContactForm({ onSubmitContact }) {
 export default function CtaFooter({ onGoPlan, onSubmitContact }) {
   return (
     <>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '70px 28px', textAlign: 'center' }}>
+      <div className="tc-pad-x" style={{ maxWidth: 1200, margin: '0 auto', padding: '70px 28px', textAlign: 'center' }}>
         <h2 style={{ fontSize: 44, letterSpacing: '-.8px', maxWidth: 640, margin: '0 auto' }}>Your next trip is waiting to be crafted.</h2>
         <button onClick={onGoPlan} style={{ background: 'var(--accent,#BC5A3C)', color: '#fff', border: 'none', padding: '16px 32px', borderRadius: 999, fontSize: 16, fontWeight: 600, cursor: 'pointer', marginTop: 26, boxShadow: '0 10px 26px -10px rgba(188,90,60,.6)' }}>
           Plan my trip — it's free
@@ -57,7 +57,7 @@ export default function CtaFooter({ onGoPlan, onSubmitContact }) {
       </div>
 
       <div style={{ background: 'var(--tc-section-alt)', borderTop: `1px solid rgba(var(--tc-border-rgb),.1)` }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '44px 28px', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 24 }}>
+        <div className="tc-footer-grid tc-pad-x" style={{ maxWidth: 1200, margin: '0 auto', padding: '44px 28px' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
               <div style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--accent,#BC5A3C)', borderRadius: 8 }}>

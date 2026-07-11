@@ -35,7 +35,7 @@ export default function StepTransport({
           )}
         </div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginTop: 16 }}>
+      <div className="tc-grid tc-grid-3" style={{ gap: 12, marginTop: 16 }}>
         {TRANSPORT_OPTIONS.map((tr) => {
           const on = form.transport === tr.title;
           return (

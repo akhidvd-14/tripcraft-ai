@@ -3,13 +3,14 @@ import { TRAVELER_CHOICES, INTEREST_CHOICES } from '../../data/content.jsx';
 export default function StepTravelers({
   form, onSelectTraveler, onIncAdults, onDecAdults, onIncKids, onDecKids, onSelectInterest,
 }) {
-  const counterBtn = { width: 32, height: 32, borderRadius: 8, border: `1px solid rgba(var(--tc-border-rgb),.2)`, background: 'var(--tc-surface-alt)', fontSize: 18, cursor: 'pointer', color: 'var(--tc-text)' };
+  const soloLock = form.travelerType === 'Solo';
+  const counterBtn = (disabled) => ({ width: 32, height: 32, borderRadius: 8, border: `1px solid rgba(var(--tc-border-rgb),.2)`, background: 'var(--tc-surface-alt)', fontSize: 18, cursor: disabled ? 'not-allowed' : 'pointer', color: 'var(--tc-text)', opacity: disabled ? 0.4 : 1 });
 
   return (
     <div style={{ animation: 'tcfade .3s ease both' }}>
       <h2 style={{ fontSize: 34, letterSpacing: '-.6px' }}>Who's traveling?</h2>
       <p style={{ color: 'var(--tc-muted)', margin: '8px 0 26px', fontSize: 15 }}>We'll tune pace, activities and recommendations to fit.</p>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }}>
+      <div className="tc-grid tc-grid-4" style={{ gap: 12 }}>
         {TRAVELER_CHOICES.map((tt) => {
           const on = form.travelerType === tt.title;
           return (
@@ -25,20 +26,21 @@ export default function StepTravelers({
         <div>
           <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--tc-muted)', display: 'block', marginBottom: 8 }}>Adults</label>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button onClick={onDecAdults} style={counterBtn}>−</button>
+            <button onClick={soloLock ? undefined : onDecAdults} disabled={soloLock} style={counterBtn(soloLock)}>−</button>
             <span style={{ fontSize: 17, fontWeight: 600, minWidth: 20, textAlign: 'center' }}>{form.adults}</span>
-            <button onClick={onIncAdults} style={counterBtn}>+</button>
+            <button onClick={soloLock ? undefined : onIncAdults} disabled={soloLock} style={counterBtn(soloLock)}>+</button>
           </div>
         </div>
         <div>
           <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--tc-muted)', display: 'block', marginBottom: 8 }}>Children</label>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button onClick={onDecKids} style={counterBtn}>−</button>
+            <button onClick={soloLock ? undefined : onDecKids} disabled={soloLock} style={counterBtn(soloLock)}>−</button>
             <span style={{ fontSize: 17, fontWeight: 600, minWidth: 20, textAlign: 'center' }}>{form.kids}</span>
-            <button onClick={onIncKids} style={counterBtn}>+</button>
+            <button onClick={soloLock ? undefined : onIncKids} disabled={soloLock} style={counterBtn(soloLock)}>+</button>
           </div>
         </div>
       </div>
+      {soloLock && <div style={{ fontSize: 12, color: 'var(--tc-muted-3)', marginTop: 8 }}>Solo trips are set to 1 traveler.</div>}
       <div style={{ marginTop: 22 }}>
         <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--tc-muted)' }}>Trip theme &amp; interests <span style={{ color: 'var(--tc-muted-3)', fontWeight: 400 }}>· pick one</span></label>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 12 }}>

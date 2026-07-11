@@ -2,7 +2,7 @@ import { formatRange } from '../data/destinations.js';
 
 export default function MyTrips({ trips, loading, onOpenTrip, onGoPlan }) {
   return (
-    <div style={{ maxWidth: 1000, margin: '0 auto', padding: '48px 28px 90px', animation: 'tcfade .4s ease both' }}>
+    <div className="tc-pad-x" style={{ maxWidth: 1000, margin: '0 auto', padding: '48px 28px 90px', animation: 'tcfade .4s ease both' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16, marginBottom: 28 }}>
         <div>
           <div style={{ fontSize: 12.5, letterSpacing: '2px', textTransform: 'uppercase', color: 'var(--accent,#BC5A3C)', marginBottom: 8 }}>Your saved journeys</div>

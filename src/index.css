@@ -112,3 +112,61 @@ input, select, textarea, button { font-family: inherit; }
 .tc-suggest-row:hover { background: var(--tc-suggest-hover) !important; }
 
 .tc-navlink { transition: color .15s; }
+
+/* ============================================================
+   RESPONSIVE  (mobile-first: base styles are for phones,
+   min-width media queries progressively enhance for larger screens)
+   ============================================================ */
+
+/* Fluid grids — collapse to fewer columns on small screens. */
+.tc-grid { display: grid; }
+.tc-grid-2 { grid-template-columns: 1fr; }
+.tc-grid-3 { grid-template-columns: 1fr; }
+.tc-grid-4 { grid-template-columns: repeat(2, 1fr); }
+@media (min-width: 620px) {
+  .tc-grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .tc-grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 900px) {
+  .tc-grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .tc-grid-4 { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* Itinerary: single column on mobile, sidebar beside content on desktop. */
+.tc-itin-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
+@media (min-width: 960px) { .tc-itin-grid { grid-template-columns: 1fr 340px; gap: 28px; } }
+
+/* Itinerary sidebar: only sticky on desktop. */
+.tc-sidebar { position: static; }
+@media (min-width: 960px) { .tc-sidebar { position: sticky; top: 84px; } }
+
+/* Testimonials masonry. */
+.tc-testi { columns: 1; column-gap: 18px; }
+@media (min-width: 620px) { .tc-testi { columns: 2; } }
+@media (min-width: 900px) { .tc-testi { columns: 3; } }
+
+/* Footer columns. */
+.tc-footer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (min-width: 760px) { .tc-footer-grid { grid-template-columns: 2fr 1fr 1fr 1fr; } }
+
+/* Reduce oversized section padding on phones (overrides inline left/right only). */
+@media (max-width: 620px) {
+  .tc-pad-x { padding-left: 18px !important; padding-right: 18px !important; }
+}
+
+/* Fluid headings so large display type doesn't overflow narrow screens. */
+@media (max-width: 620px) {
+  h1 { font-size: clamp(32px, 11vw, 52px) !important; line-height: 1.08 !important; letter-spacing: -.5px !important; }
+  h2 { font-size: clamp(24px, 7vw, 34px) !important; }
+  h3 { font-size: clamp(19px, 5.5vw, 26px) !important; }
+}
+
+/* Navbar: hide the tagline and secondary links on small screens. */
+@media (max-width: 720px) {
+  .tc-nav-tagline { display: none !important; }
+  .tc-nav-links { display: none !important; }
+}
+/* Wizard progress: hide the step text labels on very small screens (keep the numbered dots). */
+@media (max-width: 560px) {
+  .tc-wizard-steplabel { display: none !important; }
+}

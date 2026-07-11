@@ -4,7 +4,7 @@ export default function Sidebar({
   hotels, localTransport, feedbackMapUrl,
 }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, position: 'sticky', top: 84 }}>
+    <div className="tc-sidebar" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* budget */}
       <div style={{ background: '#2A2622', color: '#EDE7D8', borderRadius: 18, padding: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
