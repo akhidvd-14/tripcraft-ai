@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase.js';
+import { notifyAdmin } from '../services/notify.js';
 
 const AuthContext = createContext({
   user: null,
@@ -45,11 +46,15 @@ export function AuthProvider({ children }) {
 
   const signUp = async (email, password, fullName) => {
     if (!isSupabaseConfigured) return { error: new Error('Backend not configured') };
-    return supabase.auth.signUp({
+    const result = await supabase.auth.signUp({
       email,
       password,
       options: { data: { full_name: fullName || '' } },
     });
+    if (!result.error) {
+      notifyAdmin('profiles', { full_name: fullName || '', email, created_at: new Date().toISOString() });
+    }
+    return result;
   };
 
   const signOut = async () => {

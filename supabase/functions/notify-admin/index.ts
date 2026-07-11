@@ -14,6 +14,15 @@ const TO_EMAIL = Deno.env.get('ENQUIRY_TO_EMAIL') || 'akhidvd@gmail.com';
 const FROM_EMAIL = Deno.env.get('ENQUIRY_FROM_EMAIL') || 'TripCraft <onboarding@resend.dev>';
 const WEBHOOK_SECRET = Deno.env.get('WEBHOOK_SECRET'); // optional shared secret
 
+// Allow browser calls (the app invokes this function directly after an insert).
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-webhook-secret',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+const json = (obj: unknown, status = 200) =>
+  new Response(JSON.stringify(obj), { status, headers: { ...CORS, 'Content-Type': 'application/json' } });
+
 const esc = (s: unknown) =>
   String(s ?? '')
     .replace(/&/g, '&amp;')
@@ -64,13 +73,16 @@ function buildEmail(table: string, record: Record<string, unknown>) {
 }
 
 Deno.serve(async (req) => {
+  // CORS preflight
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
+
   try {
     if (WEBHOOK_SECRET && req.headers.get('x-webhook-secret') !== WEBHOOK_SECRET) {
-      return new Response('Unauthorized', { status: 401 });
+      return json({ error: 'Unauthorized' }, 401);
     }
     if (!RESEND_API_KEY) {
       console.error('RESEND_API_KEY not set');
-      return new Response('Email not configured', { status: 500 });
+      return json({ error: 'Email not configured (RESEND_API_KEY missing)' }, 500);
     }
 
     const payload = await req.json();
@@ -87,11 +99,11 @@ Deno.serve(async (req) => {
     if (!res.ok) {
       const body = await res.text();
       console.error('Resend error', res.status, body);
-      return new Response(`Resend error: ${res.status}`, { status: 502 });
+      return json({ error: `Resend error: ${res.status}`, detail: body }, 502);
     }
-    return new Response(JSON.stringify({ ok: true }), { headers: { 'Content-Type': 'application/json' } });
+    return json({ ok: true });
   } catch (e) {
     console.error(e);
-    return new Response('Bad request', { status: 400 });
+    return json({ error: 'Bad request' }, 400);
   }
 });
