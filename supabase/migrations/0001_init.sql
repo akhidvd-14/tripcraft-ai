@@ -92,7 +92,26 @@ create table if not exists public.trips (
 
 alter table public.trips enable row level security;
 
+-- ============================================================
+-- TRIP_COLLABORATORS  (invited members of a trip)
+-- Created before the collaborator helper/policies below, which reference it.
+-- ============================================================
+create table if not exists public.trip_collaborators (
+  id         uuid primary key default gen_random_uuid(),
+  trip_id    uuid not null references public.trips (id) on delete cascade,
+  email      text not null,
+  role       text not null default 'Can edit',
+  invited_by uuid references auth.users (id) on delete set null,
+  user_id    uuid references auth.users (id) on delete set null,
+  created_at timestamptz not null default now(),
+  unique (trip_id, email)
+);
+
+alter table public.trip_collaborators enable row level security;
+
 -- Helper: is the current user a collaborator on a given trip?
+-- (Defined after trip_collaborators exists — SQL functions are validated at
+-- creation time, so the referenced table must already exist.)
 create or replace function public.is_trip_collaborator(_trip_id uuid)
 returns boolean
 language sql
@@ -107,6 +126,7 @@ as $$
   );
 $$;
 
+-- Trips policies (owner + collaborator).
 drop policy if exists "trips_owner_all" on public.trips;
 create policy "trips_owner_all" on public.trips
   for all using (owner_id = auth.uid()) with check (owner_id = auth.uid());
@@ -118,22 +138,6 @@ create policy "trips_collab_select" on public.trips
 drop policy if exists "trips_collab_update" on public.trips;
 create policy "trips_collab_update" on public.trips
   for update using (public.is_trip_collaborator(id));
-
--- ============================================================
--- TRIP_COLLABORATORS  (invited members of a trip)
--- ============================================================
-create table if not exists public.trip_collaborators (
-  id         uuid primary key default gen_random_uuid(),
-  trip_id    uuid not null references public.trips (id) on delete cascade,
-  email      text not null,
-  role       text not null default 'Can edit',
-  invited_by uuid references auth.users (id) on delete set null,
-  user_id    uuid references auth.users (id) on delete set null,
-  created_at timestamptz not null default now(),
-  unique (trip_id, email)
-);
-
-alter table public.trip_collaborators enable row level security;
 
 -- Trip owner manages the collaborator list for their trips.
 drop policy if exists "collab_owner_all" on public.trip_collaborators;
